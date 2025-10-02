@@ -1,0 +1,78 @@
+ Verificación de hardware
+
+lscpu               Ver información del procesador
+lsblk               Ver discos y particiones
+free -h             Ver memoria RAM
+lspci               Listar dispositivos PCI
+lsusb               Listar dispositivos USB
+
+Administración de discos y particiones
+
+fdisk -l                   Listar particiones
+parted -l                  Ver discos y particiones
+mount /dev/sdXN /mnt       Montar partición
+umount /dev/sdXN           Desmontar partición
+mkfs.ext4 /dev/sdXN        Formatear en ext4
+
+
+ Gestión de usuarios
+adduser nombre_usuario        Crear usuario
+passwd nombre_usuario          Asignar contraseña
+usermod -aG sudo nombre        Dar privilegios sudo
+id nombre_usuario              Ver info de usuario
+
+Administración de software
+
+
+sudo apt update && sudo apt upgrade -y      Actualizar sistema (Debian/Ubuntu)
+sudo apt install nombre_paquete             Instalar paquete
+sudo apt remove nombre_paquete              Eliminar paquete
+rpm -qa                                     Ver paquetes instalados (RHEL/CentOS)
+yum install nombre_paquete                  Instalar paquete (CentOS 7)
+dnf install nombre_paquete                 Instalar paquete (CentOS 8+ / Fedora)
+
+Configuración de red
+
+
+ip a                         Ver interfaces de red
+ping google.com              Probar conectividad
+nmcli device show           Información de red
+ifconfig (net-tools)         Ver configuración (si está instalado)
+
+Servicios y procesos
+
+
+systemctl status servicio       Ver estado
+systemctl start servicio        Iniciar
+systemctl stop servicio         Detener
+systemctl enable servicio       Habilitar en arranque
+ps aux                          Ver procesos
+top                             Monitor en tiempo real
+
+Archivos y permisos
+
+
+pwd                          Ver directorio actual
+ls -l                         Listar archivos con permisos
+chmod 755 archivo              Cambiar permisos
+chown usuario:grupo archivo    Cambiar propietario
+nano archivo.txt               Editar archivo
+
+
+
+Repositorios y paquetes
+
+
+
+cat /etc/apt/sources.list       Repositorios (Debian/Ubuntu)
+apt-cache search nombre        Buscar paquete
+dnf repolist                   Repositorios (Fedora/CentOS)
+
+
+
+
+
+
+
+
+
