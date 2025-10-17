@@ -1,0 +1,39 @@
+# PRÁCTICAS 1, 2,
+sudo nano /etc/default/grub
+sudo update-grub
+passwd tu_usuario
+passwd root
+nano ~/nombre_del_script.sh
+chmod +x ~/nombre_del_script.sh
+~/nombre_del_script.sh
+ls ~
+ip a
+sudo apt update
+sudo apt upgrade
+sudo apt install -y openssh-server
+sudo apt install htop
+htop
+sudo apt remove htop
+sudo apt autoremove
+sudo ufw allow ssh
+sudo ufw enable
+sudo systemctl status ssh
+mkdir -p ~/.ssh
+nano ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+sudo systemctl restart ssh
+sudo adduser admintemp
+sudo usermod -aG sudo admintemp
+groups admintemp
+su - admintemp
+exit
+rm -f ~/.ssh/authorized_keys
+
+# PRÁCTICA 3
+ping 192.168.88.5
+ssh-keygen -t rsa
+ssh howard-ubuntu@192.168.88.5
+Get-Content $HOME\.ssh\id_rsa.pub
+Remove-Item $HOME\.ssh\id_rsa
+Remove-Item $HOME\.ssh\id_rsa.pub
