@@ -1,0 +1,70 @@
+1 Servidor Web Apache
+
+ 1. Instalación y directorios
+sudo apt update && sudo apt install apache2
+sudo mkdir -p /var/www/sitioweb1
+sudo mkdir -p /var/www/sitioweb2
+
+2. Creación de archivos de prueba
+sudo echo "<h1>Hola Mundo - Sitio 1 (Puerto 80)</h1>" | sudo tee /var/www/sitioweb1/index.html
+sudo echo "<h1>Hola Mundo - Sitio 2 (Puerto 8080)</h1>" | sudo tee /var/www/sitioweb2/index.html
+
+3. Configuración de puertos y sitios (Usar nano para editar)
+sudo nano /etc/apache2/ports.conf
+# AGREGAR: Listen 8080
+
+sudo nano /etc/apache2/sites-available/sitioweb1.conf
+sudo nano /etc/apache2/sites-available/sitioweb2.conf
+
+ 4. Habilitar sitios y deshabilitar por defecto
+sudo a2ensite sitioweb1.conf
+sudo a2ensite sitioweb2.conf
+sudo a2dissite 000-default.conf
+
+ 5. Corrección de sintaxis y reinicio
+sudo apache2ctl configtest
+sudo systemctl restart apache2
+
+2: Servidor de Correo
+
+ 1. Instalación de Postfix y utilidades
+sudo apt install postfix
+ Durante la instalación: Elegir 'Internet Site'
+
+sudo apt install mailutils
+
+  Envío de correo de prueba
+echo "Este es un correo de prueba desde el servidor Ubuntu." | mail -s "Prueba Postfix Exitosa" tu_correo_externo@ejemplo.com
+
+  Verificación de la cola
+mailq
+
+3 Servidor de Impresión
+
+1. Instalación y configuración básica
+sudo apt install cups
+sudo apt install printer-driver-cups-pdf
+
+ 2. Configuración de acceso remoto (Usar nano para editar)
+sudo nano /etc/cups/cupsd.conf
+ CAMBIAR o AGREGAR: Port 631
+ AGREGAR: Allow @LOCAL (Bajo la sección <Location />)
+
+ 3. Permisos de administración
+sudo usermod -aG lpadmin howard-ubuntu
+
+ 4. Configuración de ruta de guardado (CRUCIAL para el profesor)
+udo nano /etc/cups/cups-pdf.conf
+CAMBIAR o AÑADIR (Línea Out): Out /var/spool/cups-pdf/${USER}
+
+ 5. Reinicio de CUPS y creación de directorio
+sudo systemctl restart cups
+sudo mkdir -p /var/spool/cups-pdf/howard-ubuntu
+sudo chown -R howard-ubuntu:lp /var/spool/cups-pdf/howard-ubuntu
+
+ 6. Comandos de diagnóstico de red
+sudo ip a
+sudo ufw allow 80,8080,631/tcp
+
+ 7. Verificación final (después de imprimir desde Windows)
+ls -l /var/spool/cups-pdf/howard-ubuntu
