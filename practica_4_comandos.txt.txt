@@ -1,0 +1,107 @@
+ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+ssh-copy-id harold@192.168.88.11
+mkdir -p /data/sincronizar
+touch /data/sincronizar/archivo{1..100}.txt
+sudo tee /usr/local/bin/sync_data.sh > /dev/null << 'EOF'
+#!/bin/bash
+rsync -avz --delete /data/sincronizar/ harold@192.168.88.11:/home/harold/data_sincronizada
+EOF
+sudo chmod +x /usr/local/bin/sync_data.sh
+(crontab -l 2>/dev/null; echo "*/1 * * * * /usr/local/bin/sync_data.sh") | crontab -
+touch /data/sincronizar/archivo_prueba_crontab.txt
+
+mkdir -p /home/harold/data_sincronizada
+ls /home/harold/data_sincronizada | grep archivo_prueba
+sudo apt update
+sudo apt install -y pacemaker corosync pcs resource-agents -y
+sudo systemctl enable --now pcsd
+sudo systemctl enable corosync
+sudo systemctl enable pacemaker
+sudo passwd hacluster
+
+sudo pcs host auth nodo1 nodo2 -u hacluster -p Cluster2025
+sudo pcs cluster setup --name ha_cluster nodo1 nodo2 --start
+sudo pcs property set stonith-enabled=false
+sudo pcs property set no-quorum-policy=ignore
+sudo pcs resource create Virtual_IP ocf:heartbeat:IPaddr2 ip=192.168.88.200 cidr_netmask=24 nic=enp0s3 op monitor interval=10s
+sudo pcs status
+sudo systemctl stop pacemaker
+
+sudo apt install -y apache2 keepalived
+sudo tee /etc/keepalived/check_apache.sh > /dev/null << 'EOF'
+#!/bin/bash
+if systemctl is-active --quiet apache2; then
+    exit 0
+else
+    exit 1
+fi
+EOF
+sudo chmod +x /etc/keepalived/check_apache.sh
+
+
+sudo tee /var/www/html/index.html > /dev/null << 'EOF'
+<html><body><h1>Servidor Web 1 - MASTER (192.168.88.100)</h1></body></html>
+EOF
+sudo tee /etc/keepalived/keepalived.conf > /dev/null << 'EOF'
+vrrp_script chk_apache {
+    script "/etc/keepalived/check_apache.sh"
+    interval 2
+    weight 50
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface enp0s3
+    virtual_router_id 51
+    priority 101
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.88.200/24
+    }
+    track_script {
+        chk_apache
+    }
+}
+EOF
+En NODO 2 (Backup):
+
+Bash
+
+sudo tee /var/www/html/index.html > /dev/null << 'EOF'
+<html><body><h1>Servidor Web 2 - BACKUP (192.168.88.11)</h1></body></html>
+EOF
+sudo tee /etc/keepalived/keepalived.conf > /dev/null << 'EOF'
+vrrp_script chk_apache {
+    script "/etc/keepalived/check_apache.sh"
+    interval 2
+    weight 50
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface enp0s3
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.88.200/24
+    }
+    track_script {
+        chk_apache
+    }
+}
+EOF
+
+sudo systemctl restart keepalived
+sudo systemctl enable keepalived
+
+sudo systemctl stop apache2
+
