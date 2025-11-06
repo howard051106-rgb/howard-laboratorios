@@ -1,0 +1,71 @@
+Práctica 1 - Cifrado (gpg2)
+Bash
+
+sudo apt update && sudo apt install gnupg2
+gpg --full-generate-key # Opcional para clave asimétrica
+mkdir ~/practica_cifrado
+echo "Este es el contenido secreto del archivo." > ~/practica_cifrado/documento.txt
+gpg -c ~/practica_cifrado/documento.txt # Pedirá la contraseña
+cat ~/practica_cifrado/documento.txt.gpg
+gpg -o ~/practica_cifrado/documento_descifrado.txt -d ~/practica_cifrado/documento.txt.gpg # Pedirá la contraseña
+cat ~/practica_cifrado/documento_descifrado.txt
+
+Práctica 2 - Firewall (iptables y ufw)
+Habilitar Servicios
+Bash
+
+sudo apt update
+sudo apt install apache2 vsftpd openssh-server -y
+sudo systemctl enable --now apache2 vsftpd ssh
+sudo systemctl status apache2 vsftpd ssh | grep "Active"
+Bloqueo/Habilitación con iptables
+Bash
+
+sudo iptables -A INPUT -p tcp --dport 80 -j DROP
+sudo iptables -A INPUT -p tcp --dport 21 -j DROP
+sudo iptables -A INPUT -p tcp --dport 22 -j DROP
+sudo iptables -L INPUT -n --line-numbers # Mostrar reglas para identificar el número de línea
+sudo iptables -D INPUT 3 # **Asegúrate de verificar el número de línea**
+sudo iptables -D INPUT 2 # **Asegúrate de verificar el número de línea**
+sudo iptables -D INPUT 1 # **Asegúrate de verificar el número de línea**
+sudo iptables -L -n
+Bloqueo/Habilitación con ufw
+Bash
+
+sudo ufw enable
+sudo ufw deny 80/tcp
+sudo ufw deny 21/tcp
+sudo ufw deny 22/tcp
+sudo ufw status verbose
+sudo ufw delete deny 80/tcp
+sudo ufw delete deny 21/tcp
+sudo ufw delete deny 22/tcp
+sudo ufw status verbose
+
+Práctica 3 - Instalación de IDS Snort
+Bash
+
+sudo apt update
+sudo apt install snort -y
+sudo nano /etc/snort/rules/local.rules # Agregar las reglas alert (ICMP, 21, 22, 80)
+sudo snort -A console -q -c /etc/snort/snort.conf -i [interfaz] # Reemplaza [interfaz] (ej. enp0s3)
+# Comandos de prueba a ejecutar desde el Host:
+ping -c 1 [IP de la VM]
+telnet [IP de la VM] 21
+telnet [IP de la VM] 22
+curl [IP de la VM]
+
+Práctica 4: Configurar 2FA con Google Authenticator para SSH
+Bash
+
+sudo apt install libpam-google-authenticator -y
+google-authenticator # Responder 'y' a las primeras preguntas y guardar el código
+sudo nano /etc/pam.d/sshd # Añadir la línea 'auth required pam_google_authenticator.so'
+sudo nano /etc/ssh/sshd_config # Asegurar: UsePAM yes, ChallengeResponseAuthentication yes, PasswordAuthentication yes
+sudo systemctl restart sshd
+# Comando de prueba a ejecutar desde el Host:
+ssh [tu_usuario]@[IP_de_la_VM] # Pedirá Contraseña y Código 2FA
+
+
+
+
