@@ -1,0 +1,77 @@
+¡Entendido! Aquí tienes la lista estricta de solo los comandos de Linux utilizados en las Prácticas 1, 2 y 3.
+
+I. Práctica 1: Compartir Archivos con NFS
+1. En la VM Servidor (nodo1)
+Bash
+
+sudo apt update
+sudo apt install nfs-kernel-server
+sudo mkdir -p /srv/nfs/OS3
+for i in $(seq 1 100); do sudo touch /srv/nfs/OS3/Adrian${i}.txt; done
+ls /srv/nfs/OS3 | wc -l
+sudo chmod 777 /srv/nfs/OS3
+sudo chown nobody:nogroup /srv/nfs/OS3
+sudo nano /etc/exports
+# (Agregar la línea del export)
+sudo exportfs -a
+sudo systemctl restart nfs-kernel-server
+2. En la VM Cliente Linux (nodo2)
+Bash
+
+sudo apt update
+sudo apt install nfs-common
+sudo mkdir -p /mnt/servidor_nfs
+sudo mount 192.168.88.10:/srv/nfs/OS3 /mnt/servidor_nfs
+ls /mnt/servidor_nfs | head -n 5
+sudo nano /etc/fstab
+# (Agregar la línea del fstab)
+sudo umount /mnt/servidor_nfs
+sudo mount -a
+ls /mnt/servidor_nfs | head -n 5
+II. Práctica 2: File Server con SAMBA
+En la VM Servidor (nodo1)
+Bash
+
+sudo apt install samba
+sudo mkdir -p /srv/samba/Compartida
+for i in $(seq 1 100); do sudo touch /srv/samba/Compartida/adrian${i}; done
+ls /srv/samba/Compartida | wc -l
+sudo addgroup sambausers
+sudo chown root:sambausers /srv/samba/Compartida
+sudo chmod 770 /srv/samba/Compartida
+sudo useradd -M -s /sbin/nologin smbuser
+sudo usermod -aG sambausers smbuser
+sudo smbpasswd -a smbuser
+sudo nano /etc/samba/smb.conf
+# (Agregar la sección [CompartidaSamba])
+sudo systemctl restart smbd nmbd
+cat /srv/samba/Compartida/adrian99
+III. Práctica 3: Controlador de Dominio (Samba AD DC)
+En la VM Servidor (nodo1)
+Bash
+
+# Limpieza (IMPORTANTE)
+sudo systemctl stop smbd nmbd winbind
+sudo apt purge -y samba samba-common samba-common-bin smbclient
+sudo rm -rf /etc/samba /var/lib/samba
+
+# Instalación y Creación de Usuario Linux
+sudo apt install -y samba krb5-config
+sudo useradd lanegracubana -s /bin/bash
+echo "lanegracubana:SU_MATRICULA" | sudo chpasswd
+
+# Eliminación del archivo conflictivo y Provisionamiento
+sudo rm /etc/samba/smb.conf
+sudo samba-tool domain provision
+# (Completar los pasos interactivos: Realm, Domain, DNS forwarder, Admin password)
+
+# Habilitar y Arrancar el Dominio AD DC
+sudo systemctl disable smbd nmbd
+sudo systemctl unmask samba-ad-dc
+sudo systemctl enable samba-ad-dc
+sudo systemctl start samba-ad-dc
+sudo systemctl status samba-ad-dc
+
+# Creación del Usuario en AD
+# (Sustituye SU_MATRICULA por la contraseña que debe tener el usuario)
+sudo samba-tool user create lanegracubana SU_MATRICULA --given-name=La --surname=NegraCubana
