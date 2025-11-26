@@ -1,0 +1,51 @@
+Práctica 3: Despliegue de Wordpress con Docker Compose (Puerto 8082)
+
+# 1. Limpieza de contenedores de intentos fallidos/antiguos
+sudo docker stop wordpress_app wordpress_db
+sudo docker rm wordpress_app wordpress_db
+sudo docker-compose down
+
+# 2. Crear el directorio del proyecto
+mkdir -p ~/wordpress-app
+cd ~/wordpress-app
+
+# 3. Crear el archivo docker-compose.yml con la configuración del puerto 8082
+cat <<EOF > docker-compose.yml
+version: '3.8'
+
+services:
+  db:
+    image: mysql:5.7
+    container_name: wordpress-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Vargas06611*
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: Vargas06611*
+    volumes:
+      - db_data:/var/lib/mysql
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    container_name: wordpress-app
+    restart: always
+    ports:
+      - "8082:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: Vargas06611*
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wp_content:/var/www/html/wp-content
+
+volumes:
+  db_data:
+  wp_content:
+EOF
+
+# 4. Desplegar los contenedores
+sudo docker-compose up -d
