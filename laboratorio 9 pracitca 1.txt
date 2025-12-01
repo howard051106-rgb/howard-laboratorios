@@ -1,0 +1,11 @@
+# 1. Descargar la clave GPG de Webmin
+wget -qO- http://www.webmin.com/jcameron-key.asc | sudo gpg --dearmor -o /usr/share/keyrings/webmin-keyring.gpg
+
+# 2. Añadir el repositorio de Webmin a la lista de fuentes
+echo "deb [signed-by=/usr/share/keyrings/webmin-keyring.gpg] http://download.webmin.com/download/repository sarge contrib" | sudo tee /etc/apt/sources.list.d/webmin.list
+
+# 3. Actualizar la lista de paquetes del sistema
+sudo apt update -y
+
+# 4. Instalar Webmin
+sudo apt install webmin -y
